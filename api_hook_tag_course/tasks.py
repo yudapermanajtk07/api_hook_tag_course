@@ -26,13 +26,15 @@ def send_tag_data_to_api(object_id_str):
         headers["Authorization"] = f"Bearer {api_token}"
     
     payload = {
-        "object_id": object_id_str,
-        "event_type": "tags_changed"
+        "course_id": object_id_str,
     }
     
     try:
         response = requests.post(api_url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()
         log.info(f"Successfully sent tag change for {object_id_str} to API.")
+        log.info(f"API Success Response: [{response.status_code}] {response.text}")
     except requests.exceptions.RequestException as e:
         log.error(f"Failed to send tag change for {object_id_str} to API: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            log.error(f"API Error Response: [{e.response.status_code}] {e.response.text}")
