@@ -25,9 +25,27 @@ def send_tag_data_to_api(object_id_str):
     if api_token:
         headers["Authorization"] = f"Bearer {api_token}"
     
+    # --- Tambahan untuk mengambil End Date ---
+    end_date_str = None
+    try:
+        from opaque_keys.edx.keys import CourseKey
+        from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+        
+        course_key = CourseKey.from_string(object_id_str)
+        course = CourseOverview.get_from_id(course_key)
+        if course.end:
+            end_date_str = course.end.isoformat()
+    except Exception as e:
+        log.error(f"Failed to fetch course end date for {object_id_str}: {e}")
+    # ----------------------------------------
+    
     payload = {
         "course_id": object_id_str,
+        "end_date": end_date_str
     }
+    
+    log.info(f"--- DEBUG API REQUEST ---")
+    log.info(f"API Request Payload: {payload}")
     
     try:
         response = requests.post(api_url, json=payload, headers=headers, timeout=10)
