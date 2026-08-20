@@ -32,14 +32,14 @@ def trigger_api_on_tag_update(sender, **kwargs):
     send_tag_data_to_api.delay(object_id)
 
 
-from openedx_events.content_authoring.signals import COURSE_PUBLISHED
+from openedx_events.content_authoring.signals import COURSE_CATALOG_INFO_CHANGED
 
-@receiver(COURSE_PUBLISHED)
+@receiver(COURSE_CATALOG_INFO_CHANGED)
 def trigger_api_on_course_publish(sender, **kwargs):
     """
     Menangkap sinyal ketika course di-publish (termasuk saat settings disimpan).
     """
-    log.info(f"--- DEBUG COURSE_PUBLISHED KWARGS ---")
+    log.info(f"--- DEBUG COURSE_CATALOG_INFO_CHANGED KWARGS ---")
     log.info(f"Kwargs keys: {list(kwargs.keys())}")
     
     # Umumnya OEP-50 COURSE_PUBLISHED mengirimkan 'course_key'
