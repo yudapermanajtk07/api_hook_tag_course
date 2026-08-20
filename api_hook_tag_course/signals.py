@@ -42,20 +42,24 @@ def trigger_api_on_course_publish(sender, **kwargs):
     log.info(f"--- DEBUG COURSE_CATALOG_INFO_CHANGED KWARGS ---")
     log.info(f"Kwargs keys: {list(kwargs.keys())}")
     
-    # Umumnya OEP-50 COURSE_PUBLISHED mengirimkan 'course_key'
-    course_key = kwargs.get('course_key')
+    # Umumnya event data ada di 'catalog_info'
+    catalog_data = kwargs.get('catalog_info')
     
-    if not course_key:
-        # Jika bukan 'course_key', mari kita cari value pertama
+    if not catalog_data:
         for key, value in kwargs.items():
             if key != 'signal':
-                course_key = value
+                catalog_data = value
                 break
                 
-    if not course_key:
-        log.warning("No course_key found in COURSE_PUBLISHED kwargs!")
+    if not catalog_data:
+        log.warning("No data found in COURSE_CATALOG_INFO_CHANGED kwargs!")
         return
 
-    object_id = str(course_key)
+    # Ekstrak ID Course yang sebenarnya
+    if hasattr(catalog_data, 'course_key'):
+        object_id = str(catalog_data.course_key)
+    else:
+        object_id = str(catalog_data)
+
     log.info(f"Detected course publish/settings change for {object_id}. Triggering API call via Celery.")
     send_tag_data_to_api.delay(object_id)

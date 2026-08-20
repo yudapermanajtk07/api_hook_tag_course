@@ -28,10 +28,16 @@ def send_tag_data_to_api(object_id_str):
     # --- Tambahan untuk mengambil End Date ---
     end_date_str = None
     try:
-        from opaque_keys.edx.keys import CourseKey
+        from opaque_keys.edx.keys import CourseKey, UsageKey
+        from opaque_keys import InvalidKeyError
         from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
         
-        course_key = CourseKey.from_string(object_id_str)
+        try:
+            course_key = CourseKey.from_string(object_id_str)
+        except InvalidKeyError:
+            # Jika yang dikirim adalah ID modul/video (UsageKey), ambil ID Course-nya
+            course_key = UsageKey.from_string(object_id_str).course_key
+            
         course = CourseOverview.get_from_id(course_key)
         if course.end:
             end_date_str = course.end.isoformat()
